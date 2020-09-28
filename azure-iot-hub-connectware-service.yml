@@ -1,0 +1,108 @@
+description: >
+  Cybus Connectware to Azure IoT Hub
+
+metadata:
+  name: Azure IoT Hub Test
+  version: 1.0.0
+  icon: https://www.cybus.io/wp-content/uploads/2019/03/Cybus-logo-Claim-lang.svg
+  provider: cybus
+  homepage: https://www.cybus.io
+
+parameters:
+  Azure_Iot_Connection_String:
+    type: string
+    default: HostName=<your-iothub-name>.azure-devices.net;DeviceId=<your-device-id>;SharedAccessKey=<access-key-for-the-device>
+    
+  machineTopic:
+    type: string
+    default: machineData
+
+  logLevelAzureIotConnector:
+    type: string
+    description: >-
+      Sets the log level for the Azure IoT connector service.
+    default: trace
+    enum:
+      - error
+      - warn
+      - info
+      - debug
+      - trace
+
+resources:
+  # extend the defaultRole with more permissions
+  defaultRole:
+    type: Cybus::Role
+    properties:
+      permissions:
+        - resource: "#"
+          operation: readWrite
+          context: mqtt
+
+  sourceTargetMapping:
+    type: Cybus::Mapping
+    properties:
+      mappings:
+        - subscribe:
+            topic: !sub "${Cybus::MqttRoot}/test/${machineTopic}"
+          publish:
+            topic: !sub "test/AzureIoT"
+          rules:
+            - transform:
+                expression: |
+                  (
+                    {
+                      "deviceId": "TestDevice",
+                      "payload": DeviceData
+                    }
+                  )
+
+  azureIotConnector:
+    type: Cybus::Container
+    properties:
+      image: registry.cybus.io/cybus-services/azure-iot-connector:1.0.0
+      environment:
+        LOG_LEVEL: !ref logLevelAzureIotConnector
+        CONNECTOR_CONFIG: !sub |
+          {
+            "general": {
+              "name": "Azure Connector"
+            },
+            "source": {
+              "driver": "azure.iot",
+              "connection": {
+                "connectionString": "${Azure_Iot_Connection_String}"
+             },
+              "defaults": {
+                "operation": "write"
+              }
+            },
+            "target": {
+              "driver": "mqtt",
+              "connection": {
+                "protocol": "mqtt",
+                "host": "${Cybus::MqttHost}",
+                "port": ${Cybus::MqttPort},
+                "username": "${Cybus::MqttUser}",
+                "password": "${Cybus::MqttPassword}"
+              },
+              "defaults": {
+                "operation": "subscribe"
+              }
+            },
+            "mappings": [
+              {
+                "source": {
+                  "name": "DeviceData",
+                  "type": "telemetry",
+                  "properties": {
+                    "default": false,
+                    "route": "storage"
+                  }
+                },
+                "target": {
+                  "topic": "test/AzureIoT"
+                }
+              }
+            ]
+          }

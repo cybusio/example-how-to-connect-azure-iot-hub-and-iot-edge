@@ -1,0 +1,205 @@
+description: >
+  Cybus Connectware to Azure IoT Edge
+
+metadata:
+  name: Azure IoT Edge Test
+  version: 1.0.0
+  icon: https://www.cybus.io/wp-content/uploads/2019/03/Cybus-logo-Claim-lang.svg
+  provider: cybus
+  homepage: https://www.cybus.io
+
+parameters:
+  Azure_Iot_Connection_String:
+    type: string
+    default: HostName=<your-iothub-name>.azure-devices.net;DeviceId=<your-device-id>;SharedAccessKey=<access-key-for-the-device>;GatewayHostName=<hostname-of-the-edge-device>
+  machineTopic:
+    type: string
+    default: machineData
+
+  Azure_Iot_Hub_CaCertChain:
+    type: string
+    default: |
+      -----BEGIN CERTIFICATE-----
+      MIIFTDCCAzSgAwIBAgIEa4tFZzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNU
+      ZXN0IEVkZ2UgRGV2aWNlIENBMB4XDTIwMDkxNzA2MTQzNFoXDTIwMTIxNjA2MDQx
+      NFowHzEdMBsGA1UEAwwUaW90ZWRnZWQgd29ya2xvYWQgY2EwggIiMA0GCSqGSIb3
+      DQEBAQUAA4ICDwAwggIKAoICAQCi1FwJBxUlWQ5hofIXw5bJO8Zxlmn92lLMtsJ9
+      YemglWs6/rW4QFmB1rMAH+wq6CRJS0v5zVEVNpRzBtLcV77T5h5X3KVfdjwSxknw
+      9tHwtUxUnSRRoGtkZSA12TqWVKTpxp5CPQc2efLqzPJirLamCExfd8wKg4nQX1fa
+      6ppA02cnb+jJwJVIiMgELcpB1ocGs7/bpfLMUfsaGxpTJF2BeXt9pxPlsJ+gLzO1
+      SM1qaF3KcEHAvFFNRG3iB7Z18omvdHgNNR9ERi6e0WlN9Rk0N3pSkAUuMkm/MnP9
+      KahNnpO4IV+6bp0DYARClvZwIbDn/6xxuTgDfhdmPpJaVt9nB//xbmn3dD73GCml
+      YsaNrU0eyK2l99sGtmKv/UyBxAmVwpNoxlcCBomzCGRpichBKU5WzwlgT+d+Jwrt
+      FX9XKkSkEc1aELsgwkebHJOvHT9brg0sDQ30DxJ9euGfZLVEBPQI39l/f3XrHF+N
+      bdO1PIepm5teI6w5X0D0l8fsOATtLIO4wXq8v/UUNSY1s6eWK838lywwa8oUwv2y
+      KGWqV/KlXPWv7wtws37liQ4JwZUE4BtXMEHVeTdND6ByFmp4ebNn2czGJysojGhI
+      jj8JZhKDHKLyMLBP4+ObR3mP0KmQkmGbOG8JuI11XPRu2hf/D6BY/OUwxb90KNr3
+      /FB2uwIDAQABo4GQMIGNMBIGA1UdEwEB/wQIMAYBAf8CAQAwDgYDVR0PAQH/BAQD
+      AgKEMB0GA1UdDgQWBBQA3dzol/h6zJiYzqNamgS/21v/njBIBgNVHSMEQTA/gBRJ
+      hQd5sekbkQMY/WIh4fqIsxZONaEhpB8wHTEbMBkGA1UEAwwSVGVzdCBFZGdlIE93
+      bmVyIENBggQyeyPGMA0GCSqGSIb3DQEBCwUAA4ICAQAC2QA8iatTnlkpmhyrXhvY
+      +vrMscUdHZZBxe6L+18OD5vPZ1+dUIx19ZESaD8zDwIs0JAjoJcKzioubUuN3MWZ
+      dM4KCg3hFqzXWw19yYqTIY0GcEzezV2U45YaN6oNfDfXEsOP2J8a341VHmlzqLBR
+      QZb+VBiOqOOI96qVZ9nwR85ISwGnBKPbxkynnaGFxJFUzSIDR8Lg5WPzhreFP4Ye
+      IrOAh2bcjEveJ0FE1qoihwprYx+4Ugl9OiGMBHu+tOVKSWYZPIeyvJRlFd+Ecd4Q
+      cEGutdbK9ZExdYJ6/FW3X8Re1w8xL/en7wPzYIL+NlU46le1epr8fvp5E0rF/OrP
+      RzO2jyGfF6S8256SMQowtMKW0SAQIGGgfN2Cic9jrN+/kqic1TeHSLO3Cz6nXSHq
+      iv5wF0NYlm1dDhJ1rnTv4zF3oBgONrdgPwVUiNxCVa8T1jxggAgoJ7i9vTCrXP7A
+      ADYaOIDmlWV6KrORQuafngolsL4lVuzZdFv+k/OkUSDELqWSmJ0/GCXtIa5MUbD+
+      0dP1Z+o44TtWt1mH0IPC7W81GpLmZnEYI5Iar3mg2XxWxVAeLMUnT7ue6dhG2AGo
+      6IxieX0Mnj6F9WK+RmDka9Y5S+FC28P+l2KZ8DWtokwfgcNAWSlVB+u2SerBzGmJ
+      +ke9zkReqMe7hxFQq2qg1A==
+      -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      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
+      dFbiPgrwLgKQt9WTvTw=
+      -----END CERTIFICATE-----
+      -----BEGIN CERTIFICATE-----
+      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
+      cDlGILyecsrWDLSk5g==
+      -----END CERTIFICATE-----
+
+  logLevelAzureIotConnector:
+    type: string
+    description: >-
+      Sets the log level for the Azure IoT connector service.
+    default: trace
+    enum:
+      - error
+      - warn
+      - info
+      - debug
+      - trace
+
+resources:
+  # extend the defaultRole with more permissions
+  defaultRole:
+    type: Cybus::Role
+    properties:
+      permissions:
+        - resource: "#"
+          operation: readWrite
+          context: mqtt
+
+  sourceTargetMapping:
+    type: Cybus::Mapping
+    properties:
+      mappings:
+        - subscribe:
+            topic: !sub "${Cybus::MqttRoot}/test/${machineTopic}"
+          publish:
+            topic: !sub "test/AzureIoT"
+          rules:
+            - transform:
+                expression: |
+                  (
+                    {
+                      "deviceId": "TestDeviceEdge",
+                      "payload": DeviceData
+                    }
+                  )
+
+  azureIotConnector:
+    type: Cybus::Container
+    properties:
+      image: registry.cybus.io/cybus-services/azure-iot-connector:1.0.0
+      environment:
+        LOG_LEVEL: !ref logLevelAzureIotConnector
+        CA_CERTIFICATE_CHAIN: !ref Azure_Iot_Hub_CaCertChain
+        CONNECTOR_CONFIG: !sub |
+          {
+            "general": {
+              "name": "Azure Connector"
+            },
+            "source": {
+              "driver": "azure.iot",
+              "connection": {
+                "connectionString": "${Azure_Iot_Connection_String}"
+             },
+              "defaults": {
+                "operation": "write"
+              }
+            },
+            "target": {
+              "driver": "mqtt",
+              "connection": {
+                "protocol": "mqtt",
+                "host": "${Cybus::MqttHost}",
+                "port": ${Cybus::MqttPort},
+                "username": "${Cybus::MqttUser}",
+                "password": "${Cybus::MqttPassword}"
+              },
+              "defaults": {
+                "operation": "subscribe"
+              }
+            },
+            "mappings": [
+              {
+                "source": {
+                  "name": "DeviceData",
+                  "type": "telemetry",
+                  "properties": {
+                    "default": false,
+                    "route": "storage"
+                  }
+                },
+                "target": {
+                  "topic": "test/AzureIoT"
+                }
+              }
+            ]
+          }
